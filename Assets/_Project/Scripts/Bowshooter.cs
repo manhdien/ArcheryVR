@@ -122,7 +122,7 @@ public class MyBowShooter : MonoBehaviour
             Collider col = arrowToLaunch.GetComponent<Collider>();
             if (col != null) col.enabled = true;
 
-            MyArrow arrowScript = arrowToLaunch.GetComponent<Arrow>();
+            MyArrow arrowScript = arrowToLaunch.GetComponent<MyArrow>();
             Vector3 shootDirection = nockPoint.forward;
 
             if (arrowScript != null)
