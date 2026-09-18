@@ -146,8 +146,8 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 18432737}
-  m_LocalRotation: {x: -0, y: 0.9426415, z: -0, w: -0.33380687}
-  m_LocalPosition: {x: 0, y: 0, z: 4}
+  m_LocalRotation: {x: -0.07884327, y: -0.18555121, z: -0.014937896, w: 0.97935253}
+  m_LocalPosition: {x: 0, y: 0, z: 3.8}
   m_LocalScale: {x: 0.002, y: 0.002, z: 0.002}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -156,7 +156,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 3.8, y: 1.6}
+  m_AnchoredPosition: {x: 1.2, y: 1.35}
   m_SizeDelta: {x: 800, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &18432739
@@ -216,7 +216,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!223 &18432742
 Canvas:
   m_ObjectHideFlags: 0
@@ -227,7 +227,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 990791127}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -9724,7 +9724,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Reset
+  m_text: "S\u1EB5n s\xE0ng"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -17311,15 +17311,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400208, guid: e53c0edb812c5344698949e4671d1a2c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -11.31
+      value: -11.310001
       objectReference: {fileID: 0}
     - target: {fileID: 400208, guid: e53c0edb812c5344698949e4671d1a2c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.95
+      value: -0.8634651
       objectReference: {fileID: 0}
     - target: {fileID: 400208, guid: e53c0edb812c5344698949e4671d1a2c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4.97
+      value: -4.9699993
       objectReference: {fileID: 0}
     - target: {fileID: 400208, guid: e53c0edb812c5344698949e4671d1a2c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -21271,6 +21271,7 @@ GameObject:
   - component: {fileID: 2039926797}
   - component: {fileID: 2039926799}
   - component: {fileID: 2039926798}
+  - component: {fileID: 2039926800}
   m_Layer: 0
   m_Name: ArcheryTerrain
   m_TagString: Untagged
@@ -21354,6 +21355,38 @@ Terrain:
   m_EnableTreesAndDetailsRayTracing: 0
   m_EnableHeightmapLODFrustumCulling: 1
   m_TreeMotionVectorModeOverride: 3
+--- !u!114 &2039926800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2039926796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 3e8f7522089c47043aed1b90edbe84df, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1001 &2047022685
 PrefabInstance:
   m_ObjectHideFlags: 0

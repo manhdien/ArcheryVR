@@ -97,7 +97,7 @@ public class ScoreManager : MonoBehaviour
 
         onScoreReset?.Invoke();
         OnScoreResetEvent?.Invoke();
-        NotifyScoreChanged(0, "Reset");
+        NotifyScoreChanged(0, "Sẵn sàng");
     }
 
     private void NotifyScoreChanged(int addedScore, string zoneName)
