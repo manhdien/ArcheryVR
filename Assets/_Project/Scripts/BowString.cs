@@ -1,13 +1,19 @@
 using UnityEngine;
 
-[ExecuteAlways]
+[RequireComponent(typeof(LineRenderer))]
 public class BowString : MonoBehaviour
 {
+    [Header("String Points")]
     public Transform stringTop;
     public Transform pullPoint;
     public Transform stringBottom;
 
     private LineRenderer line;
+
+    private void Awake()
+    {
+        Setup();
+    }
 
     private void OnEnable()
     {
@@ -15,14 +21,8 @@ public class BowString : MonoBehaviour
         UpdateString();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        UpdateString();
-    }
-
-    private void OnValidate()
-    {
-        Setup();
         UpdateString();
     }
 
@@ -31,8 +31,10 @@ public class BowString : MonoBehaviour
         if (line == null)
             line = GetComponent<LineRenderer>();
 
-        if (line != null)
-            line.positionCount = 3;
+        line.positionCount = 3;
+
+        // Chúng ta truyền WORLD POSITION bên dưới
+        line.useWorldSpace = true;
     }
 
     private void UpdateString()
@@ -40,7 +42,9 @@ public class BowString : MonoBehaviour
         if (line == null)
             return;
 
-        if (stringTop == null || pullPoint == null || stringBottom == null)
+        if (stringTop == null ||
+            pullPoint == null ||
+            stringBottom == null)
             return;
 
         line.SetPosition(0, stringTop.position);
