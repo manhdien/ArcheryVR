@@ -1,1157 +1,491 @@
+using System;
 using System.Collections;
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+#endif
 
 public class BowShoot : MonoBehaviour
 {
-    // =========================================================
-    // BOW
-    // =========================================================
-
-    [Header("BOW POINTS")]
+    [Header("BOW REFERENCES")]
     [SerializeField] private Transform stringTop;
     [SerializeField] private Transform stringBottom;
     [SerializeField] private Transform pullPoint;
-    [SerializeField] private Transform grabHandle;
     [SerializeField] private Transform bowCenter;
+    [SerializeField] private Transform arrowSpawnPoint;
 
-
-    // =========================================================
-    // HANDS
-    // =========================================================
-
-    [Header("HANDS")]
-    [SerializeField] private Transform leftHand;
-    [SerializeField] private Transform rightHand;
-
-
-    // =========================================================
-    // RIGHT HAND INPUT
-    // =========================================================
-
-    [Header("RIGHT HAND INPUT")]
-
-    // Gán:
-    // XRI Right Interaction / Select Value
-    [SerializeField]
-    private InputActionReference rightGripAction;
-
-
-    // =========================================================
-    // ARROW
-    // =========================================================
+    [Header("CAMERA")]
+    [SerializeField] private Camera playerCamera;
 
     [Header("ARROW")]
     [SerializeField] private GameObject arrowPrefab;
-    [SerializeField] private Transform arrowSpawnPoint;
+    [SerializeField] private Vector3 arrowRotationOffset = new Vector3(0f, 90f, 0f);
 
+    [Header("PULL SETTINGS")]
+    [SerializeField] private float maxPullDistance = 0.4f;
+    [SerializeField] private float drawDuration = 1.0f;
+    [SerializeField] private float minPullToShoot = 0.1f;
 
-    [Header("ARROW ROTATION")]
-    [SerializeField]
-    private Vector3 arrowRotationOffset =
-        new Vector3(-90f, 0f, 0f);
+    [Header("SHOOT SETTINGS")]
+    [SerializeField] private float minShootSpeed = 12f;
+    [SerializeField] private float maxShootSpeed = 35f;
+    [SerializeField] private float ignoreCollisionTime = 0.2f;
 
+    [Header("AIM SETTINGS (RMB)")]
+    [SerializeField] private float defaultFov = 60f;
+    [SerializeField] private float aimFov = 45f;
+    [SerializeField] private float fovTransitionSpeed = 10f;
 
-    // =========================================================
-    // GRAB
-    // =========================================================
+    [Header("Hệ thống số lượng tên (Ammo)")]
+    [Tooltip("Số lượng tên tối đa")]
+    [SerializeField] private int maxAmmo = 20;
 
-    [Header("STRING GRAB")]
+    [Tooltip("Số lượng tên hiện tại")]
+    [SerializeField] private int currentAmmo = 20;
 
-    [SerializeField]
-    private float grabDistance = 0.20f;
+    public int MaxAmmo => maxAmmo;
+    public int CurrentAmmo => currentAmmo;
 
+    /// <summary>
+    /// Event phát ra khi số lượng tên thay đổi: (int currentAmmo, int maxAmmo)
+    /// </summary>
+    public event Action<int, int> OnAmmoChanged;
 
-    // =========================================================
-    // PULL
-    // =========================================================
+    /// <summary>
+    /// Event phát ra khi lực kéo dây cung thay đổi: (float normalizedCharge: 0.0 -> 1.0)
+    /// </summary>
+    public event Action<float> OnChargeChanged;
 
-    [Header("PULL")]
-
-    [SerializeField]
-    private float maxPullDistance = 0.5f;
-
-    [SerializeField]
-    private float minPullToShoot = 0.05f;
-
-
-    // =========================================================
-    // SHOOT
-    // =========================================================
-
-    [Header("SHOOT")]
-
-    [SerializeField]
-    private float minShootSpeed = 3f;
-
-    [SerializeField]
-    private float maxShootSpeed = 20f;
-
-
-    // =========================================================
-    // COLLISION
-    // =========================================================
-
-    [Header("COLLISION")]
-
-    [SerializeField]
-    private float ignoreCollisionTime = 0.15f;
-
-
-    // =========================================================
-    // PRIVATE
-    // =========================================================
-
+    // Runtime state
     private GameObject currentArrow;
     private Rigidbody currentArrowRb;
-    private Transform currentArrowNockPoint;
-
-
-    // Vị trí nghỉ
-    private Vector3 pullPointRestLocalPosition;
-
-    private Vector3 grabHandleRestLocalPosition;
-    private Quaternion grabHandleRestLocalRotation;
-
-
-    // Có đang trong một chu kỳ kéo dây không
-    private bool isPulling = false;
-
-
-    // Grip tay phải ở frame trước
-    private bool previousRightGrip = false;
-
-
-    // Lực kéo hiện tại
-    private float currentPullDistance = 0f;
-
-
-    // =========================================================
-    // MỐC TAY PHẢI
-    //
-    // Khi bắt đầu kéo hoặc quay lại tay phải,
-    // vị trí tay hiện tại được dùng làm mốc.
-    //
-    // Sau đó chỉ tính phần DI CHUYỂN thêm của tay.
-    //
-    // Nhờ vậy xoay cung bằng tay trái sẽ không làm
-    // currentPullDistance nhảy về 0.
-    // =========================================================
-
-    private Vector3 rightHandAnchorPosition;
-
-    private float pullDistanceAtAnchor = 0f;
-
-    private bool hasRightHandAnchor = false;
-
-
     private Collider[] bowColliders;
 
+    private Vector3 pullPointRestLocalPos;
+    private Vector3 pullDirection;
 
-    // =========================================================
-    // AWAKE
-    // =========================================================
+    private bool isDrawing = false;
+    private bool isAiming = false;
+    private float chargeTimer = 0f;
+    private float currentPullPercent = 0f;
+
+    public bool IsDrawing => isDrawing;
+    public bool IsAiming => isAiming;
+    public float CurrentPullPercent => currentPullPercent;
 
     private void Awake()
     {
         if (pullPoint != null)
         {
-            pullPointRestLocalPosition =
-                pullPoint.localPosition;
+            pullPointRestLocalPos = pullPoint.localPosition;
         }
 
-
-        if (grabHandle != null)
-        {
-            grabHandleRestLocalPosition =
-                grabHandle.localPosition;
-
-            grabHandleRestLocalRotation =
-                grabHandle.localRotation;
-        }
-
-
-        bowColliders =
-            GetComponentsInChildren<Collider>(
-                true
-            );
+        bowColliders = GetComponentsInChildren<Collider>(true);
     }
 
-
-    // =========================================================
-    // ENABLE
-    // =========================================================
-
-    private void OnEnable()
+    private void Start()
     {
-        if (rightGripAction != null)
+        if (playerCamera == null)
         {
-            rightGripAction.action.Enable();
+            playerCamera = Camera.main;
+            if (playerCamera == null)
+            {
+                playerCamera = GetComponentInParent<Camera>();
+            }
         }
+
+        CalculatePullDirection();
+
+        currentAmmo = maxAmmo;
+        OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
+        OnChargeChanged?.Invoke(0f);
     }
 
-
-    // =========================================================
-    // DISABLE
-    // =========================================================
-
-    private void OnDisable()
+    private void CalculatePullDirection()
     {
-        if (rightGripAction != null)
+        if (pullPoint != null && bowCenter != null)
         {
-            rightGripAction.action.Disable();
+            // Vector from bowCenter (grip) to pullPoint (rest string position)
+            Vector3 centerToRest = pullPoint.position - bowCenter.position;
+            if (centerToRest.sqrMagnitude > 0.0001f)
+            {
+                pullDirection = pullPoint.parent.InverseTransformDirection(centerToRest.normalized);
+            }
+            else
+            {
+                pullDirection = Vector3.forward;
+            }
+        }
+        else
+        {
+            pullDirection = Vector3.forward;
         }
     }
-
-
-    // =========================================================
-    // UPDATE
-    // =========================================================
 
     private void Update()
     {
-        HandleRightGrip();
+        HandleAim();
+        HandleDrawInput();
+        UpdatePull();
     }
 
-
-    // =========================================================
-    // LATE UPDATE
-    // =========================================================
-
-    private void LateUpdate()
+    private void HandleAim()
     {
-        if (!isPulling)
-            return;
-
-
-        bool rightGrip =
-            IsRightGripPressed();
-
-
-        // =====================================================
-        // CHỈ THAY ĐỔI LỰC KHI TAY PHẢI ĐANG ACTIVE
-        // =====================================================
-
-        if (rightGrip &&
-            hasRightHandAnchor)
+        bool aimPressed = false;
+#if ENABLE_INPUT_SYSTEM
+        if (Mouse.current != null)
         {
-            UpdatePullDistanceFromRightHand();
+            aimPressed = Mouse.current.rightButton.isPressed;
+        }
+        else
+#endif
+        {
+            aimPressed = Input.GetMouseButton(1);
         }
 
+        isAiming = aimPressed;
 
-        // =====================================================
-        // DÙ TAY PHẢI ACTIVE HAY KHÔNG
-        //
-        // Vẫn ép PullPoint theo lực đã lưu.
-        //
-        // Khi xoay cung bằng tay trái,
-        // dây sẽ xoay theo cung nhưng giữ nguyên độ kéo.
-        // =====================================================
-
-        ApplyStoredPullDistance();
-
-
-        UpdateArrow();
-    }
-
-
-    // =========================================================
-    // RIGHT GRIP
-    // =========================================================
-
-    private bool IsRightGripPressed()
-    {
-        if (rightGripAction == null)
-            return false;
-
-
-        if (rightGripAction.action == null)
-            return false;
-
-
-        return
-            rightGripAction.action.ReadValue<float>()
-            > 0.5f;
-    }
-
-
-    // =========================================================
-    // HANDLE RIGHT GRIP
-    // =========================================================
-
-    private void HandleRightGrip()
-    {
-        bool rightGrip =
-            IsRightGripPressed();
-
-
-        // =====================================================
-        // GRIP VỪA BẬT
-        // =====================================================
-
-        if (rightGrip &&
-            !previousRightGrip)
+        if (playerCamera != null)
         {
-            if (!isPulling)
+            float targetFov = isAiming ? aimFov : defaultFov;
+            playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, targetFov, Time.deltaTime * fovTransitionSpeed);
+        }
+    }
+
+    private void HandleDrawInput()
+    {
+        bool drawDown = false;
+        bool drawHeld = false;
+        bool drawUp = false;
+        bool cancelPressed = false;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Mouse.current != null)
+        {
+            drawDown = Mouse.current.leftButton.wasPressedThisFrame;
+            drawHeld = Mouse.current.leftButton.isPressed;
+            drawUp = Mouse.current.leftButton.wasReleasedThisFrame;
+        }
+        if (Keyboard.current != null)
+        {
+            cancelPressed = Keyboard.current.rKey.wasPressedThisFrame;
+        }
+#endif
+        if (!drawDown && Input.GetMouseButtonDown(0)) drawDown = true;
+        if (!drawHeld && Input.GetMouseButton(0)) drawHeld = true;
+        if (!drawUp && Input.GetMouseButtonUp(0)) drawUp = true;
+        if (Input.GetKeyDown(KeyCode.R)) cancelPressed = true;
+
+        // Cancel draw if R pressed
+        if (cancelPressed && isDrawing)
+        {
+            CancelDraw();
+            return;
+        }
+
+        // Start drawing
+        if (drawDown && !isDrawing)
+        {
+            if (currentAmmo > 0)
             {
-                // Một phát bắn mới
-                TryStartPull();
+                StartDraw();
             }
             else
             {
-                // =================================================
-                // ĐANG CÓ TÊN + ĐANG GIỮ LỰC
-                //
-                // Nghĩa là:
-                // vừa chỉnh cung bằng tay trái
-                // rồi quay lại tay phải.
-                //
-                // Tạo mốc mới nhưng KHÔNG reset lực.
-                // =================================================
-
-                SetRightHandAnchor();
-
-
-                Debug.Log(
-                    "QUAY LAI TAY PHAI | GIU LUC = " +
-                    currentPullDistance
-                );
+                Debug.Log("[BowShoot] Hết tên! Không thể nạp mũi tên mới.");
             }
         }
 
-
-        // =====================================================
-        // GRIP TAY PHẢI VỪA TẮT
-        // =====================================================
-
-        if (!rightGrip &&
-            previousRightGrip &&
-            isPulling)
+        // Holding draw
+        if (isDrawing && drawHeld)
         {
-            // =================================================
-            // Nếu G bàn phím vẫn đang được giữ
-            //
-            // -> người dùng chỉ vừa chuyển từ Right sang Left.
-            // -> KHÔNG BẮN.
-            // =================================================
+            chargeTimer += Time.deltaTime;
+            currentPullPercent = Mathf.Clamp01(chargeTimer / drawDuration);
+            OnChargeChanged?.Invoke(currentPullPercent);
+        }
 
-            if (Keyboard.current != null &&
-                Keyboard.current.gKey.isPressed)
+        // Release draw
+        if (isDrawing && drawUp)
+        {
+            if (currentPullPercent >= minPullToShoot)
             {
-                hasRightHandAnchor = false;
-
-
-                Debug.Log(
-                    "CHUYEN SANG TAY TRAI | GIU LUC = " +
-                    currentPullDistance
-                );
+                ShootArrow();
             }
             else
             {
-                // =================================================
-                // G thật sự được THẢ
-                // -> BẮN
-                // =================================================
-
-                TryShoot();
+                CancelDraw();
             }
         }
-
-
-        previousRightGrip =
-            rightGrip;
     }
 
-
-    // =========================================================
-    // START PULL
-    // =========================================================
-
-    private void TryStartPull()
+    private void StartDraw()
     {
-        if (rightHand == null ||
-            pullPoint == null)
-        {
+        isDrawing = true;
+        chargeTimer = 0f;
+        currentPullPercent = 0f;
+
+        AudioManager.Instance?.PlayBowDraw();
+        SpawnArrowOnString();
+    }
+
+    private void SpawnArrowOnString()
+    {
+        if (arrowPrefab == null || pullPoint == null)
             return;
-        }
 
-
-        // =====================================================
-        // KHÔNG ĐO VỚI GrabHandle.position NỮA.
-        //
-        // GrabHandle có thể đã bị XR kéo đi.
-        //
-        // Ta đo với VỊ TRÍ NGHỈ CỦA DÂY.
-        // =====================================================
-
-        Vector3 stringRestPosition =
-            GetStringRestWorldPosition();
-
-
-        float distance =
-            Vector3.Distance(
-                rightHand.position,
-                stringRestPosition
-            );
-
-
-        if (distance > grabDistance)
-        {
-            Debug.Log(
-                "RIGHT HAND CHUA GAN DAY | Distance = " +
-                distance
-            );
-
-            return;
-        }
-
-
-        // Đã có tên rồi thì tuyệt đối không spawn thêm
         if (currentArrow != null)
-            return;
-
-
-        isPulling = true;
-
-
-        currentPullDistance = 0f;
-
-
-        SetRightHandAnchor();
-
-
-        SpawnArrow();
-
-
-        Debug.Log(
-            "BAT DAU KEO DAY"
-        );
-    }
-
-
-    // =========================================================
-    // LẤY VỊ TRÍ NGHỈ CỦA DÂY
-    // =========================================================
-
-    private Vector3 GetStringRestWorldPosition()
-    {
-        if (pullPoint == null)
-            return transform.position;
-
-
-        return pullPoint.parent.TransformPoint(
-            pullPointRestLocalPosition
-        );
-    }
-
-
-    // =========================================================
-    // SET MỐC TAY PHẢI
-    // =========================================================
-
-    private void SetRightHandAnchor()
-    {
-        if (rightHand == null)
-            return;
-
-
-        rightHandAnchorPosition =
-            rightHand.position;
-
-
-        pullDistanceAtAnchor =
-            currentPullDistance;
-
-
-        hasRightHandAnchor = true;
-    }
-
-
-    // =========================================================
-    // UPDATE PULL DISTANCE
-    // =========================================================
-
-    private void UpdatePullDistanceFromRightHand()
-    {
-        if (rightHand == null)
-            return;
-
-
-        Vector3 shootDirection =
-            GetShootDirection();
-
-
-        Vector3 pullDirection =
-            -shootDirection;
-
-
-        // =====================================================
-        // CHỈ LẤY DELTA TỪ MỐC TAY PHẢI
-        //
-        // Không lấy khoảng cách tuyệt đối tới cung.
-        //
-        // Vì vậy cung có di chuyển/xoay do tay trái
-        // cũng không làm mất lực.
-        // =====================================================
-
-        Vector3 handDelta =
-            rightHand.position -
-            rightHandAnchorPosition;
-
-
-        float extraPull =
-            Vector3.Dot(
-                handDelta,
-                pullDirection
-            );
-
-
-        currentPullDistance =
-            pullDistanceAtAnchor +
-            extraPull;
-
-
-        currentPullDistance =
-            Mathf.Clamp(
-                currentPullDistance,
-                0f,
-                maxPullDistance
-            );
-    }
-
-
-    // =========================================================
-    // APPLY STORED PULL
-    // =========================================================
-
-    private void ApplyStoredPullDistance()
-    {
-        if (pullPoint == null)
-            return;
-
-
-        Vector3 restPosition =
-            GetStringRestWorldPosition();
-
-
-        Vector3 pullDirection =
-            -GetShootDirection();
-
-
-        pullPoint.position =
-            restPosition +
-            pullDirection *
-            currentPullDistance;
-    }
-
-
-    // =========================================================
-    // SHOOT DIRECTION
-    // =========================================================
-
-    private Vector3 GetShootDirection()
-    {
-        if (pullPoint == null ||
-            bowCenter == null)
-        {
-            return transform.forward;
-        }
-
-
-        Vector3 restPosition =
-            GetStringRestWorldPosition();
-
-
-        Vector3 direction =
-            bowCenter.position -
-            restPosition;
-
-
-        if (direction.sqrMagnitude <
-            0.0001f)
-        {
-            return transform.forward;
-        }
-
-
-        return direction.normalized;
-    }
-
-
-    // =========================================================
-    // BOW UP
-    // =========================================================
-
-    private Vector3 GetBowUp()
-    {
-        if (stringTop == null ||
-            stringBottom == null)
-        {
-            return transform.up;
-        }
-
-
-        Vector3 up =
-            stringTop.position -
-            stringBottom.position;
-
-
-        if (up.sqrMagnitude <
-            0.0001f)
-        {
-            return transform.up;
-        }
-
-
-        return up.normalized;
-    }
-
-
-    // =========================================================
-    // SPAWN ARROW
-    // =========================================================
-
-    private void SpawnArrow()
-    {
-        if (currentArrow != null)
-            return;
-
-
-        if (arrowPrefab == null ||
-            arrowSpawnPoint == null)
-        {
-            isPulling = false;
-
-            return;
-        }
-
-
-        currentArrow =
-            Instantiate(
-                arrowPrefab,
-                arrowSpawnPoint.position,
-                Quaternion.identity
-            );
-
-
-        currentArrowRb =
-            currentArrow.GetComponent<Rigidbody>();
-
-
-        if (currentArrowRb == null)
-        {
-            Debug.LogError(
-                "ARROW KHONG CO RIGIDBODY!"
-            );
-
-
             Destroy(currentArrow);
 
+        Transform spawnOrigin = arrowSpawnPoint != null ? arrowSpawnPoint : pullPoint;
+        currentArrow = Instantiate(arrowPrefab, spawnOrigin.position, spawnOrigin.rotation, pullPoint);
 
-            currentArrow = null;
-
-            isPulling = false;
-
-
-            return;
-        }
-
-
-        currentArrowNockPoint =
-            FindChildByName(
-                currentArrow.transform,
-                "ArrowNockPoint"
-            );
-
-
-        if (currentArrowNockPoint == null)
+        currentArrowRb = currentArrow.GetComponent<Rigidbody>();
+        if (currentArrowRb != null)
         {
-            Debug.LogError(
-                "KHONG TIM THAY ArrowNockPoint!"
-            );
-
-
-            Destroy(currentArrow);
-
-
-            currentArrow = null;
-
-            currentArrowRb = null;
-
-            isPulling = false;
-
-
-            return;
+            currentArrowRb.isKinematic = true;
+            currentArrowRb.useGravity = false;
         }
 
-
-        currentArrowRb.isKinematic = true;
-
-        currentArrowRb.useGravity = false;
-
-
-        AlignArrowToString();
-
-
-        Debug.Log(
-            "SPAWN 1 ARROW"
-        );
-    }
-
-
-    // =========================================================
-    // FIND CHILD
-    // =========================================================
-
-    private Transform FindChildByName(
-        Transform parent,
-        string childName
-    )
-    {
-        Transform[] children =
-            parent.GetComponentsInChildren<Transform>(
-                true
-            );
-
-
-        foreach (Transform child in children)
+        Collider arrowCol = currentArrow.GetComponent<Collider>();
+        if (arrowCol != null)
         {
-            if (child.name == childName)
-            {
-                return child;
-            }
+            arrowCol.enabled = false;
         }
-
-
-        return null;
-    }
-
-
-    // =========================================================
-    // UPDATE ARROW
-    // =========================================================
-
-    private void UpdateArrow()
-    {
-        if (currentArrow == null)
-            return;
-
 
         AlignArrowToString();
     }
 
+    private void UpdatePull()
+    {
+        if (pullPoint == null) return;
 
-    // =========================================================
-    // ALIGN ARROW
-    // =========================================================
+        if (isDrawing)
+        {
+            // Pull the string point along pullDirection
+            pullPoint.localPosition = pullPointRestLocalPos + pullDirection * (currentPullPercent * maxPullDistance);
+            AlignArrowToString();
+        }
+        else
+        {
+            pullPoint.localPosition = pullPointRestLocalPos;
+        }
+    }
 
     private void AlignArrowToString()
     {
-        if (currentArrow == null ||
-            currentArrowNockPoint == null ||
-            arrowSpawnPoint == null)
+        if (currentArrow == null) return;
+
+        Vector3 forwardDir;
+        if (playerCamera != null)
         {
+            forwardDir = playerCamera.transform.forward;
+        }
+        else if (bowCenter != null && pullPoint != null)
+        {
+            forwardDir = (bowCenter.position - pullPoint.position).normalized;
+        }
+        else
+        {
+            forwardDir = transform.forward;
+        }
+
+        currentArrow.transform.rotation = Quaternion.LookRotation(forwardDir) * Quaternion.Euler(arrowRotationOffset);
+
+        if (arrowSpawnPoint != null)
+        {
+            currentArrow.transform.position = arrowSpawnPoint.position;
+        }
+    }
+
+    private void ShootArrow()
+    {
+        if (currentArrow == null || currentArrowRb == null)
+        {
+            ResetBow();
             return;
         }
 
+        float shootSpeed = Mathf.Lerp(minShootSpeed, maxShootSpeed, currentPullPercent);
 
-        Vector3 shootDirection =
-            GetShootDirection();
-
-
-        Vector3 bowUp =
-            GetBowUp();
-
-
-        Quaternion rotation =
-            Quaternion.LookRotation(
-                shootDirection,
-                bowUp
-            );
-
-
-        currentArrow.transform.rotation =
-            rotation *
-            Quaternion.Euler(
-                arrowRotationOffset
-            );
-
-
-        Vector3 offset =
-            arrowSpawnPoint.position -
-            currentArrowNockPoint.position;
-
-
-        currentArrow.transform.position +=
-            offset;
-    }
-
-
-    // =========================================================
-    // TRY SHOOT
-    // =========================================================
-
-    private void TryShoot()
-    {
-        if (!isPulling)
-            return;
-
-
-        // =====================================================
-        // KHÔNG BẮN TÊN LỰC 0
-        // =====================================================
-
-        if (currentPullDistance <
-            minPullToShoot)
+        // Determine precise aim direction via screen center raycast
+        Vector3 shootDirection;
+        if (playerCamera != null)
         {
-            Debug.Log(
-                "LUC KEO QUA NHO -> KHONG BAN"
-            );
+            Ray aimRay = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+            Vector3 targetPoint;
+            if (Physics.Raycast(aimRay, out RaycastHit hit, 100f))
+            {
+                targetPoint = hit.point;
+            }
+            else
+            {
+                targetPoint = aimRay.GetPoint(100f);
+            }
 
-
-            CancelArrow();
-
-            return;
+            Vector3 startPos = arrowSpawnPoint != null ? arrowSpawnPoint.position : pullPoint.position;
+            shootDirection = (targetPoint - startPos).normalized;
+        }
+        else
+        {
+            shootDirection = transform.forward;
         }
 
+        // Unparent arrow
+        GameObject firedArrow = currentArrow;
+        firedArrow.transform.SetParent(null, true);
 
-        ReleaseString();
-    }
-
-
-    // =========================================================
-    // RELEASE STRING
-    // =========================================================
-
-    private void ReleaseString()
-    {
-        if (!isPulling)
-            return;
-
-
-        // =====================================================
-        // LƯU LỰC TRƯỚC KHI BẤT KỲ THỨ GÌ RESET
-        // =====================================================
-
-        float savedPullDistance =
-            currentPullDistance;
-
-
-        Vector3 savedShootDirection =
-            GetShootDirection();
-
-
-        Debug.Log(
-            "RELEASE | Saved Pull = " +
-            savedPullDistance
-        );
-
-
-        isPulling = false;
-
-        hasRightHandAnchor = false;
-
-
-        ShootArrow(
-            savedPullDistance,
-            savedShootDirection
-        );
-
-
-        ResetBowString();
-
-
-        currentPullDistance = 0f;
-    }
-
-
-    // =========================================================
-    // SHOOT
-    // =========================================================
-
-    private void ShootArrow(
-        float savedPullDistance,
-        Vector3 savedShootDirection
-    )
-    {
-        if (currentArrow == null ||
-            currentArrowRb == null)
+        // Re-enable collider
+        Collider arrowCol = firedArrow.GetComponent<Collider>();
+        if (arrowCol != null)
         {
-            return;
+            arrowCol.enabled = true;
         }
 
+        // Launch arrow
+        Arrow arrowScript = firedArrow.GetComponent<Arrow>();
+        if (arrowScript != null)
+        {
+            arrowScript.rotationOffset = arrowRotationOffset;
+            arrowScript.Launch(shootDirection * shootSpeed);
+        }
+        else
+        {
+            currentArrowRb.isKinematic = false;
+            currentArrowRb.useGravity = true;
+            currentArrowRb.linearVelocity = shootDirection * shootSpeed;
+            firedArrow.transform.rotation = Quaternion.LookRotation(shootDirection) * Quaternion.Euler(arrowRotationOffset);
+        }
 
-        // Căn lần cuối
-        AlignArrowToString();
+        // Âm thanh buông cung & Camera shake nhẹ
+        AudioManager.Instance?.PlayBowRelease();
+        if (playerCamera != null)
+        {
+            var camCtrl = playerCamera.GetComponent<PlayerCameraController>();
+            if (camCtrl != null)
+            {
+                camCtrl.ShakeCamera(0.12f, 0.03f + 0.05f * currentPullPercent);
+            }
+        }
 
+        // Trừ ammo khi bắn thực tế
+        currentAmmo--;
+        OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
+        Debug.Log($"[BowShoot] Đã bắn tên! Số tên còn lại: {currentAmmo}/{maxAmmo}");
 
-        float pullPercent =
-            savedPullDistance /
-            maxPullDistance;
+        // Ghi nhận mũi tên đã bắn để tính Accuracy
+        ScoreManager.Instance?.RecordArrowFired();
 
+        // Kiểm tra hết tên -> Kích hoạt Game Over sau khi mũi tên chạm đích
+        if (currentAmmo <= 0)
+        {
+            StartCoroutine(NotifyGameOverDelayed(1.8f));
+        }
 
-        pullPercent =
-            Mathf.Clamp01(
-                pullPercent
-            );
+        // Ignore temporary collision with bow
+        StartCoroutine(IgnoreBowCollisionTemporarily(firedArrow));
 
-
-        float shootSpeed =
-            Mathf.Lerp(
-                minShootSpeed,
-                maxShootSpeed,
-                pullPercent
-            );
-
-
-        GameObject firedArrow =
-            currentArrow;
-
-
-        Rigidbody firedRb =
-            currentArrowRb;
-
-
-        SetArrowCollisionIgnored(
-            firedArrow,
-            true
-        );
-
-
-        firedRb.isKinematic = false;
-
-        firedRb.useGravity = true;
-
-
-        firedRb.collisionDetectionMode =
-            CollisionDetectionMode.ContinuousDynamic;
-
-
-        firedRb.interpolation =
-            RigidbodyInterpolation.Interpolate;
-
-
-        firedRb.angularVelocity =
-            Vector3.zero;
-
-
-        firedRb.linearVelocity =
-            savedShootDirection *
-            shootSpeed;
-
-
-        Debug.Log(
-            "BAN TEN | Pull = " +
-            savedPullDistance +
-            " | Power = " +
-            pullPercent +
-            " | Speed = " +
-            shootSpeed
-        );
-
-
-        StartCoroutine(
-            RestoreCollision(
-                firedArrow
-            )
-        );
-
-
+        // Clear current arrow reference
         currentArrow = null;
-
         currentArrowRb = null;
 
-        currentArrowNockPoint = null;
+        ResetBow();
     }
 
-
-    // =========================================================
-    // CANCEL ARROW
-    // =========================================================
-
-    private void CancelArrow()
+    private void OnDisable()
     {
-        isPulling = false;
+        if (isDrawing)
+        {
+            CancelDraw();
+        }
+        if (isAiming)
+        {
+            isAiming = false;
+            if (playerCamera != null) playerCamera.fieldOfView = defaultFov;
+        }
+        OnChargeChanged?.Invoke(0f);
+    }
 
-        hasRightHandAnchor = false;
+    private IEnumerator NotifyGameOverDelayed(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Playing)
+        {
+            GameManager.Instance.TriggerGameOver();
+        }
+    }
 
+    /// <summary>
+    /// Nạp lại đầy số lượng tên.
+    /// </summary>
+    public void ResetAmmo()
+    {
+        currentAmmo = maxAmmo;
+        OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
+        Debug.Log($"[BowShoot] Đã nạp lại toàn bộ tên: {currentAmmo}/{maxAmmo}");
+    }
 
+    /// <summary>
+    /// Thêm số lượng tên cho người chơi.
+    /// </summary>
+    public void AddAmmo(int amount)
+    {
+        currentAmmo = Mathf.Clamp(currentAmmo + amount, 0, maxAmmo);
+        OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
+    }
+
+    private void CancelDraw()
+    {
         if (currentArrow != null)
         {
             Destroy(currentArrow);
+            currentArrow = null;
+            currentArrowRb = null;
         }
 
-
-        currentArrow = null;
-
-        currentArrowRb = null;
-
-        currentArrowNockPoint = null;
-
-
-        currentPullDistance = 0f;
-
-
-        ResetBowString();
+        ResetBow();
     }
 
-
-    // =========================================================
-    // RESET
-    // =========================================================
-
-    private void ResetBowString()
+    private void ResetBow()
     {
+        isDrawing = false;
+        chargeTimer = 0f;
+        currentPullPercent = 0f;
+        OnChargeChanged?.Invoke(0f);
+
         if (pullPoint != null)
         {
-            pullPoint.localPosition =
-                pullPointRestLocalPosition;
-        }
-
-
-        // =====================================================
-        // QUAN TRỌNG:
-        //
-        // Bản trước thiếu phần này.
-        // Sau vài phát GrabHandle bị nằm ở vị trí kéo cũ.
-        // =====================================================
-
-        if (grabHandle != null)
-        {
-            grabHandle.localPosition =
-                grabHandleRestLocalPosition;
-
-
-            grabHandle.localRotation =
-                grabHandleRestLocalRotation;
+            pullPoint.localPosition = pullPointRestLocalPos;
         }
     }
 
-
-    // =========================================================
-    // COLLISION
-    // =========================================================
-
-    private void SetArrowCollisionIgnored(
-        GameObject arrow,
-        bool ignore
-    )
+    private IEnumerator IgnoreBowCollisionTemporarily(GameObject arrow)
     {
-        if (arrow == null)
-            return;
+        if (arrow == null || bowColliders == null)
+            yield break;
 
-
-        Collider[] arrowColliders =
-            arrow.GetComponentsInChildren<Collider>(
-                true
-            );
-
-
-        if (bowColliders != null)
+        Collider[] arrowColliders = arrow.GetComponentsInChildren<Collider>(true);
+        foreach (Collider arrowCol in arrowColliders)
         {
-            foreach (Collider arrowCol in arrowColliders)
+            if (arrowCol == null) continue;
+            foreach (Collider bowCol in bowColliders)
             {
-                if (arrowCol == null)
-                    continue;
-
-
-                foreach (Collider bowCol in bowColliders)
-                {
-                    if (bowCol == null)
-                        continue;
-
-
-                    if (arrowCol == bowCol)
-                        continue;
-
-
-                    Physics.IgnoreCollision(
-                        arrowCol,
-                        bowCol,
-                        ignore
-                    );
-                }
+                if (bowCol == null || bowCol == arrowCol) continue;
+                Physics.IgnoreCollision(arrowCol, bowCol, true);
             }
         }
 
+        yield return new WaitForSeconds(ignoreCollisionTime);
 
-        IgnoreHandCollision(
-            arrowColliders,
-            leftHand,
-            ignore
-        );
-
-
-        IgnoreHandCollision(
-            arrowColliders,
-            rightHand,
-            ignore
-        );
-    }
-
-
-    // =========================================================
-    // HAND COLLISION
-    // =========================================================
-
-    private void IgnoreHandCollision(
-        Collider[] arrowColliders,
-        Transform hand,
-        bool ignore
-    )
-    {
-        if (hand == null)
-            return;
-
-
-        Collider[] handColliders =
-            hand.GetComponentsInChildren<Collider>(
-                true
-            );
-
+        if (arrow == null) yield break;
 
         foreach (Collider arrowCol in arrowColliders)
         {
-            if (arrowCol == null)
-                continue;
-
-
-            foreach (Collider handCol in handColliders)
+            if (arrowCol == null) continue;
+            foreach (Collider bowCol in bowColliders)
             {
-                if (handCol == null)
-                    continue;
-
-
-                Physics.IgnoreCollision(
-                    arrowCol,
-                    handCol,
-                    ignore
-                );
+                if (bowCol == null || bowCol == arrowCol) continue;
+                Physics.IgnoreCollision(arrowCol, bowCol, false);
             }
         }
-    }
-
-
-    // =========================================================
-    // RESTORE COLLISION
-    // =========================================================
-
-    private IEnumerator RestoreCollision(
-        GameObject arrow
-    )
-    {
-        yield return new WaitForSeconds(
-            ignoreCollisionTime
-        );
-
-
-        if (arrow == null)
-            yield break;
-
-
-        SetArrowCollisionIgnored(
-            arrow,
-            false
-        );
     }
 }

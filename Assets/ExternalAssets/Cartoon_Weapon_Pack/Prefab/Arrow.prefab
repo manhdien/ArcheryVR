@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 9500000}
   - component: {fileID: -2525540438222879680}
   - component: {fileID: 5702057562377565502}
+  - component: {fileID: 8296674991846789212}
   m_Layer: 0
   m_Name: Arrow
   m_TagString: Untagged
@@ -165,6 +166,32 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.2201066, y: 0.09913856, z: 0.060955107}
   m_Center: {x: -0.025199777, y: 0.0000000034092231, z: 0.011354743}
+--- !u!114 &8296674991846789212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 549d19017b61a24469eb883b2a45bed0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Arrow
+  state: 0
+  hasScored: 0
+  minSpeedToRotate: 0.1
+  rotationOffset: {x: 0, y: 90, z: 0}
+  stickDepth: 0.08
+  stickableLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  destroyAfterStick: 10
+  hitEffectPrefab: {fileID: 0}
+  hitSound: {fileID: 0}
+  targetHitEffectPrefab: {fileID: 7483784615166252547, guid: b16ca4e865f7dc244a669417bb0c8999, type: 3}
+  npcHitEffectPrefab: {fileID: 8913031329496060500, guid: 44702d5da1f14214b9640f77f8328c16, type: 3}
+  groundHitEffectPrefab: {fileID: 8245490074702415873, guid: 2d10a796f6cc0f34d8be817a2a92caf3, type: 3}
 --- !u!1 &3288169973261877780
 GameObject:
   m_ObjectHideFlags: 0
