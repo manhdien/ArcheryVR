@@ -694,8 +694,8 @@ public class BowShoot : MonoBehaviour
 
 
         Debug.Log(
-            "SPAWN 1 ARROW"
-        );
+            $"TAO TEN | Cung: {gameObject.name} | Script ID: {GetEntityId()}",
+           this);
     }
 
 
@@ -955,7 +955,7 @@ public class BowShoot : MonoBehaviour
                 firedArrow
             )
         );
-
+        Destroy(firedArrow, 10f);
 
         currentArrow = null;
 
