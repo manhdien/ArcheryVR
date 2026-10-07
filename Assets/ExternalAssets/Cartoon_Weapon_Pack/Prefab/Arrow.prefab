@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 9500000}
   - component: {fileID: -2525540438222879680}
   - component: {fileID: 5702057562377565502}
+  - component: {fileID: 2758967793060339945}
   m_Layer: 0
   m_Name: Arrow
   m_TagString: Untagged
@@ -165,6 +166,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.2201066, y: 0.09913856, z: 0.060955107}
   m_Center: {x: -0.025199777, y: 0.0000000034092231, z: 0.011354743}
+--- !u!114 &2758967793060339945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a33ddacdb4d5c4f4e90b9248f8f735ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets._Project.Scripts.NewMonoBehaviour
+  arrowTipPoint: {fileID: 2154904736309882588}
+  penetrationDepth: 0.05
 --- !u!1 &3288169973261877780
 GameObject:
   m_ObjectHideFlags: 0

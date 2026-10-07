@@ -955,7 +955,6 @@ public class BowShoot : MonoBehaviour
                 firedArrow
             )
         );
-        Destroy(firedArrow, 10f);
 
         currentArrow = null;
 
