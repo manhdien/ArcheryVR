@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class ArrowStick : MonoBehaviour
@@ -10,6 +10,7 @@ public class ArrowStick : MonoBehaviour
 
     private Rigidbody rb;
     private bool stuck;
+    private bool hasScored;
 
     private void Awake()
     {
@@ -18,10 +19,10 @@ public class ArrowStick : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (stuck || rb.isKinematic)
+        if (stuck || hasScored || rb.isKinematic)
             return;
 
-        // Chỉ ghim vào mặt bia có tag Target.
+        // Chỉ ghim và tính điểm vào mặt bia có tag Target.
         if (!collision.collider.CompareTag("Target"))
             return;
 
@@ -31,8 +32,16 @@ public class ArrowStick : MonoBehaviour
             return;
         }
 
-        ContactPoint contact = collision.GetContact(0);
+        // Đánh dấu đã tính điểm ngay lập tức (chống cộng điểm nhiều lần)
+        hasScored = true;
         stuck = true;
+
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.AddScore(10);
+        }
+
+        ContactPoint contact = collision.GetContact(0);
 
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
