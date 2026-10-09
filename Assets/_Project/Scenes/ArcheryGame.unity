@@ -726,30 +726,11 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 0
---- !u!1 &76505973 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
-  m_PrefabInstance: {fileID: 551858008}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &76505974 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
   m_PrefabInstance: {fileID: 551858008}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &76505975
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 76505973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7817a381de2eba4899097f12adc2f8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TargetHorizontal
-  speed: 3
-  distance: 4
 --- !u!1001 &77099752
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3700,9 +3681,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1461816523}
     - targetCorrespondingSourceObject: {fileID: -1314872803122130754, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
       insertIndex: -1
       addedObject: {fileID: 268023532}
@@ -4406,31 +4384,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 2221bb8a9a61ffa4e8a0ad56cf586985, type: 3}
   m_PrefabInstance: {fileID: 335232724}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &348405738 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
-  m_PrefabInstance: {fileID: 1879343486}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &348405739 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
   m_PrefabInstance: {fileID: 1879343486}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &348405740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 348405738}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 906795ace030e6a45b6762c05f42504b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TargetBoth
-  speed: 2
-  horizontalDistance: 3
-  verticalDistance: 2
 --- !u!1001 &355957675
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6897,11 +6855,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 519551110}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d504c61cf1003a847bae6438161a0bed, type: 3}
+  m_Script: {fileID: 11500000, guid: c7817a381de2eba4899097f12adc2f8b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TargetVertical
-  speed: 2
-  distance: 2
+  m_EditorClassIdentifier: Assembly-CSharp::TargetHorizontal
+  speed: 3
+  distance: 4
 --- !u!1001 &519603980
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7297,9 +7255,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 76505975}
     - targetCorrespondingSourceObject: {fileID: -1314872803122130754, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
       insertIndex: -1
       addedObject: {fileID: 59200775}
@@ -9285,9 +9240,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1192907122}
     - targetCorrespondingSourceObject: {fileID: -1314872803122130754, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
       insertIndex: -1
       addedObject: {fileID: 383435989}
@@ -14508,30 +14460,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1f9036ec905b920479091aca9ba81305, type: 3}
---- !u!1 &1192907120 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
-  m_PrefabInstance: {fileID: 710652404}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1192907121 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
   m_PrefabInstance: {fileID: 710652404}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1192907122
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1192907120}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7817a381de2eba4899097f12adc2f8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TargetHorizontal
-  speed: 3
-  distance: 4
 --- !u!1001 &1198092967
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17486,26 +17419,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7746927824541037661, guid: 1f9036ec905b920479091aca9ba81305, type: 3}
   m_PrefabInstance: {fileID: 1458963195}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1461816522 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
-  m_PrefabInstance: {fileID: 268023530}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1461816523
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1461816522}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 906795ace030e6a45b6762c05f42504b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TargetBoth
-  speed: 2
-  horizontalDistance: 3
-  verticalDistance: 2
 --- !u!1001 &1462116820
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22464,9 +22377,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 348405740}
     - targetCorrespondingSourceObject: {fileID: -1314872803122130754, guid: dff2f46a6ab0b7b4db9c6dd1e38cb335, type: 3}
       insertIndex: -1
       addedObject: {fileID: 829567078}
@@ -24372,6 +24282,9 @@ MonoBehaviour:
   speed: 2
   horizontalDistance: 3
   verticalDistance: 2
+  startPosition: {x: 0, y: 0, z: 0}
+  horizontalDirection: 1
+  verticalDirection: 1
 --- !u!1001 &2078642943
 PrefabInstance:
   m_ObjectHideFlags: 0
