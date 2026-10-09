@@ -369,6 +369,11 @@ public class BowShoot : MonoBehaviour
 
     private void TryStartPull()
     {
+        if (ScoreManager.Instance != null && !ScoreManager.Instance.CanShoot)
+        {
+            return;
+        }
+
         if (rightHand == null ||
             pullPoint == null)
         {
@@ -878,6 +883,17 @@ public class BowShoot : MonoBehaviour
             currentArrowRb == null)
         {
             return;
+        }
+
+        if (ScoreManager.Instance != null && !ScoreManager.Instance.CanShoot)
+        {
+            CancelArrow();
+            return;
+        }
+
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.RecordShot();
         }
 
 

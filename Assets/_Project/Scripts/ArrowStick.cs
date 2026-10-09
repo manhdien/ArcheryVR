@@ -26,6 +26,10 @@ public class ArrowStick : MonoBehaviour
         if (!collision.collider.CompareTag("Target"))
             return;
 
+        // Bảo vệ: Nếu ván đã kết thúc thì không tính điểm (chặn callback đến muộn)
+        if (ScoreManager.Instance != null && !ScoreManager.Instance.IsPlaying)
+            return;
+
         if (arrowTipPoint == null)
         {
             Debug.LogError("Chưa gán Arrow Tip Point!", this);
