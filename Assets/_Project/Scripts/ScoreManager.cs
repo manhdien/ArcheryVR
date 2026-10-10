@@ -26,7 +26,11 @@ public class ScoreManager : MonoBehaviour
     [Header("Timer Settings")]
     [SerializeField] private float roundDuration = 60f;
     [SerializeField] private float timeRemaining = 60f;
+    [SerializeField] private bool isTimerRunning = false;
     [SerializeField] private GameOverReason lastGameOverReason = GameOverReason.None;
+
+    [Header("Bow Reference")]
+    [SerializeField] private UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable bowInteractable;
 
     [Header("Runtime State")]
     [SerializeField] private int currentScore = 0;
@@ -53,10 +57,11 @@ public class ScoreManager : MonoBehaviour
     public int ArrowsRemaining => Mathf.Max(0, maxArrows - arrowsShot);
     public float TimeRemaining => Mathf.Max(0f, timeRemaining);
     public float RoundDuration => roundDuration;
+    public bool IsTimerRunning => isTimerRunning;
     public GameOverReason LastGameOverReason => lastGameOverReason;
     public GameState State => state;
     public bool IsPlaying => state == GameState.Playing;
-    public bool CanShoot => state == GameState.Playing && ArrowsRemaining > 0 && timeRemaining > 0f;
+    public bool CanShoot => state == GameState.Playing && isTimerRunning && ArrowsRemaining > 0 && timeRemaining > 0f;
 
     private void Awake()
     {
@@ -77,8 +82,8 @@ public class ScoreManager : MonoBehaviour
 
     private void Update()
     {
-        // 1. Quản lý đồng hồ đếm ngược 60s khi đang chơi
-        if (state == GameState.Playing)
+        // 1. Quản lý đồng hồ đếm ngược 60s khi đang chơi VÀ ĐÃ CẦM CUNG
+        if (state == GameState.Playing && isTimerRunning)
         {
             if (timeRemaining > 0f)
             {
@@ -97,6 +102,15 @@ public class ScoreManager : MonoBehaviour
                         UpdateScoreUI();
                     }
                 }
+            }
+        }
+        // Hỗ trợ phím B để mô phỏng sự kiện cầm cung khi test PC/Editor
+        if (state == GameState.Playing && !isTimerRunning)
+        {
+            if (UnityEngine.InputSystem.Keyboard.current != null &&
+                UnityEngine.InputSystem.Keyboard.current.bKey.wasPressedThisFrame)
+            {
+                OnBowGrabbed();
             }
         }
         // 2. Hỗ trợ phím tắt Space/Enter để bắt đầu game nhanh khi ở StartMenu
@@ -217,6 +231,17 @@ public class ScoreManager : MonoBehaviour
             }
         }
 
+        if (bowInteractable == null)
+        {
+            bowInteractable = FindAnyObjectByType<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        }
+
+        if (bowInteractable != null)
+        {
+            bowInteractable.selectEntered.RemoveListener(OnBowSelectEntered);
+            bowInteractable.selectEntered.AddListener(OnBowSelectEntered);
+        }
+
         if (startButton != null)
         {
             startButton.onClick.RemoveListener(StartGame);
@@ -232,9 +257,33 @@ public class ScoreManager : MonoBehaviour
         UpdatePanelVisibility();
     }
 
+    private void OnDestroy()
+    {
+        if (bowInteractable != null)
+        {
+            bowInteractable.selectEntered.RemoveListener(OnBowSelectEntered);
+        }
+    }
+
+    public void OnBowGrabbed()
+    {
+        // Chỉ kích hoạt khi đang ở trạng thái Playing và bộ đếm chưa chạy
+        if (state == GameState.Playing && !isTimerRunning)
+        {
+            isTimerRunning = true;
+            lastDisplayedSeconds = Mathf.CeilToInt(timeRemaining);
+            UpdateScoreUI();
+        }
+    }
+
+    public void OnBowSelectEntered(UnityEngine.XR.Interaction.Toolkit.SelectEnterEventArgs args)
+    {
+        OnBowGrabbed();
+    }
+
     public bool RecordShot()
     {
-        if (state != GameState.Playing || ArrowsRemaining <= 0 || timeRemaining <= 0f)
+        if (state != GameState.Playing || !isTimerRunning || ArrowsRemaining <= 0 || timeRemaining <= 0f)
         {
             return false;
         }
@@ -252,8 +301,8 @@ public class ScoreManager : MonoBehaviour
 
     public void AddScore(int points = -1)
     {
-        // Bảo vệ: Nếu ván đã kết thúc hoặc hết thời gian, ngăn tuyệt đối việc cộng điểm (kể cả va chạm đến muộn)
-        if (state != GameState.Playing || timeRemaining <= 0f)
+        // Bảo vệ: Nếu ván đã kết thúc, chưa cầm cung hoặc hết thời gian, ngăn tuyệt đối việc cộng điểm (kể cả va chạm đến muộn)
+        if (state != GameState.Playing || !isTimerRunning || timeRemaining <= 0f)
             return;
 
         if (points < 0) points = pointsPerHit;
@@ -272,6 +321,7 @@ public class ScoreManager : MonoBehaviour
         currentScore = 0;
         arrowsShot = 0;
         timeRemaining = roundDuration;
+        isTimerRunning = false; // Chuyển sang trạng thái chờ cầm cung, chưa chạy đồng hồ
         lastDisplayedSeconds = Mathf.CeilToInt(roundDuration);
         lastGameOverReason = GameOverReason.None;
         state = GameState.Playing;
@@ -287,6 +337,7 @@ public class ScoreManager : MonoBehaviour
             return;
 
         state = GameState.GameOver;
+        isTimerRunning = false;
         lastGameOverReason = reason;
 
         UpdatePanelVisibility();
@@ -310,6 +361,7 @@ public class ScoreManager : MonoBehaviour
         currentScore = 0;
         arrowsShot = 0;
         timeRemaining = roundDuration;
+        isTimerRunning = false; // Trở về trạng thái chờ cầm cung ở ván mới
         lastDisplayedSeconds = Mathf.CeilToInt(roundDuration);
         lastGameOverReason = GameOverReason.None;
         state = GameState.Playing;
