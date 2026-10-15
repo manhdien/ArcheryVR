@@ -342,6 +342,9 @@ public class ScoreManager : MonoBehaviour
 
         UpdatePanelVisibility();
 
+        // Hủy bất kỳ tên hoặc trạng thái kéo dây dở dang khi game over
+        ResetBowShoot();
+
         if (resultSummaryText != null)
         {
             string reasonStr = (reason == GameOverReason.TimeExpired) ? "HẾT THỜI GIAN" : "HẾT MŨI TÊN";
@@ -378,7 +381,22 @@ public class ScoreManager : MonoBehaviour
             }
         }
 
+        // Đảm bảo dây cung và mũi tên dở dang được reset hoàn toàn cho ván mới
+        ResetBowShoot();
+
         UpdateScoreUI();
+    }
+
+    private void ResetBowShoot()
+    {
+        var bowShoots = FindObjectsByType<BowShoot>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var bs in bowShoots)
+        {
+            if (bs != null)
+            {
+                bs.ResetBowState();
+            }
+        }
     }
 
     public void SetTimeRemaining(float seconds)

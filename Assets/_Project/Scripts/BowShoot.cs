@@ -369,9 +369,18 @@ public class BowShoot : MonoBehaviour
 
     private void TryStartPull()
     {
-        if (ScoreManager.Instance != null && !ScoreManager.Instance.CanShoot)
+        if (ScoreManager.Instance != null)
         {
-            return;
+            if (!ScoreManager.Instance.IsPlaying || ScoreManager.Instance.ArrowsRemaining <= 0 || ScoreManager.Instance.TimeRemaining <= 0f)
+            {
+                return;
+            }
+
+            // Nếu người chơi bắt đầu kéo dây khi đồng hồ chưa chạy (ví dụ đang cầm cung từ ván trước hoặc vừa restart), kích hoạt bộ đếm
+            if (!ScoreManager.Instance.IsTimerRunning)
+            {
+                ScoreManager.Instance.OnBowGrabbed();
+            }
         }
 
         if (rightHand == null ||
@@ -977,6 +986,17 @@ public class BowShoot : MonoBehaviour
         currentArrowRb = null;
 
         currentArrowNockPoint = null;
+    }
+
+
+    // =========================================================
+    // RESET BOW STATE
+    // =========================================================
+
+    public void ResetBowState()
+    {
+        CancelArrow();
+        previousRightGrip = false;
     }
 
 
