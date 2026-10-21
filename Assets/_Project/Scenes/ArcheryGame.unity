@@ -1889,10 +1889,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<align=\"left\"><pos=68><color=#B8860B><b>H\u1EA0NG 1</b></color><pos=228><b><color=#8B4513>100
-    \u0110I\u1EC2M</color></b><pos=378><color=#4E342E>00:00</color></align>\r\n<align=\"left\"><pos=68><color=#546E7A><b>H\u1EA0NG
-    2</b></color><pos=228><b><color=#8B4513>100 \u0110I\u1EC2M</color></b><pos=378><color=#4E342E>00:20</color></align>\r\n<align=\"left\"><pos=68><color=#8D6E63><b>H\u1EA0NG
-    3</b></color><pos=228><b><color=#8B4513>95 \u0110I\u1EC2M</color></b><pos=378><color=#4E342E>00:20</color></align>"
+  m_text: "<align=\"center\"><size=90%><color=#795548>CH\u01AFA C\xD3 K\u1EF6 L\u1EE4C</color></size></align>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ee0fbe26be2f1374f9bb7208f9d74538, type: 2}
   m_sharedMaterial: {fileID: 597518852}
@@ -3029,7 +3026,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 6, y: 0}
   m_SizeDelta: {x: 640, y: 480}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &177707928
@@ -7992,6 +7989,10 @@ MonoBehaviour:
   minShootSpeed: 3
   maxShootSpeed: 20
   ignoreCollisionTime: 0.15
+  bowPullAudioSource: {fileID: 685124709}
+  bowPullClip: {fileID: 8300000, guid: 22f62ba1612fff14aad3fbb0f582bca5, type: 3}
+  bowPullVolume: 0.85
+  bowPullSpatialBlend: 1
 --- !u!4 &485090545 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5316609513351239561, guid: 4db940c31d61ac149801c850fc645d68, type: 3}
@@ -10293,7 +10294,7 @@ Transform:
   m_GameObject: {fileID: 661323137}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.306, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10814,6 +10815,7 @@ GameObject:
   - component: {fileID: 685124706}
   - component: {fileID: 685124707}
   - component: {fileID: 685124708}
+  - component: {fileID: 685124709}
   m_Layer: 0
   m_Name: BowString
   m_TagString: Untagged
@@ -10996,6 +10998,107 @@ MonoBehaviour:
   minShootSpeed: 5
   maxShootSpeed: 35
   ignoreCollisionTime: 0.2
+  bowPullAudioSource: {fileID: 685124709}
+  bowPullClip: {fileID: 8300000, guid: 22f62ba1612fff14aad3fbb0f582bca5, type: 3}
+  bowPullVolume: 0.85
+  bowPullSpatialBlend: 1
+--- !u!82 &685124709
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 685124704}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 22f62ba1612fff14aad3fbb0f582bca5, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.85
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!4 &692308156 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7746927824541037661, guid: 1f9036ec905b920479091aca9ba81305, type: 3}
@@ -13247,13 +13350,7 @@ MonoBehaviour:
   state: 0
   hasRecordedResultThisRound: 0
   leaderboardData:
-    records:
-    - score: 100
-      timeUsed: 0
-    - score: 100
-      timeUsed: 20
-    - score: 95
-      timeUsed: 20
+    records: []
   scoreText: {fileID: 88055675}
   scorePanel: {fileID: 1092652094}
   hudScoreText: {fileID: 276967403}
@@ -17715,7 +17812,7 @@ Transform:
   m_GameObject: {fileID: 1169740278}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.306, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -19374,8 +19471,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 2.5001}
-  m_SizeDelta: {x: 530, y: 277}
+  m_AnchoredPosition: {x: 6, y: 2.5001}
+  m_SizeDelta: {x: 553.4, y: 277}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1310027842
 MonoBehaviour:
@@ -32006,10 +32103,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<align=\"left\"><pos=68><color=#B8860B><b>H\u1EA0NG 1</b></color><pos=228><b><color=#8B4513>100
-    \u0110I\u1EC2M</color></b><pos=378><color=#4E342E>00:00</color></align>\r\n<align=\"left\"><pos=68><color=#546E7A><b>H\u1EA0NG
-    2</b></color><pos=228><b><color=#8B4513>100 \u0110I\u1EC2M</color></b><pos=378><color=#4E342E>00:20</color></align>\r\n<align=\"left\"><pos=68><color=#8D6E63><b>H\u1EA0NG
-    3</b></color><pos=228><b><color=#8B4513>95 \u0110I\u1EC2M</color></b><pos=378><color=#4E342E>00:20</color></align>"
+  m_text: "<align=\"center\"><size=90%><color=#795548>CH\u01AFA C\xD3 K\u1EF6 L\u1EE4C</color></size></align>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ee0fbe26be2f1374f9bb7208f9d74538, type: 2}
   m_sharedMaterial: {fileID: 802040345}

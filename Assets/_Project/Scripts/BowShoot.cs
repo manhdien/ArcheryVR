@@ -99,6 +99,17 @@ public class BowShoot : MonoBehaviour
 
 
     // =========================================================
+    // AUDIO
+    // =========================================================
+
+    [Header("AUDIO")]
+    [SerializeField] private AudioSource bowPullAudioSource;
+    [SerializeField] private AudioClip bowPullClip;
+    [Range(0f, 1f)] [SerializeField] private float bowPullVolume = 0.85f;
+    [Range(0f, 1f)] [SerializeField] private float bowPullSpatialBlend = 1f;
+
+
+    // =========================================================
     // PRIVATE
     // =========================================================
 
@@ -175,6 +186,64 @@ public class BowShoot : MonoBehaviour
             GetComponentsInChildren<Collider>(
                 true
             );
+
+        SetupAudio();
+    }
+
+
+    // =========================================================
+    // AUDIO METHODS
+    // =========================================================
+
+    private void SetupAudio()
+    {
+        if (bowPullAudioSource == null)
+        {
+            bowPullAudioSource = GetComponent<AudioSource>();
+            if (bowPullAudioSource == null)
+            {
+                bowPullAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+        }
+
+        bowPullAudioSource.playOnAwake = false;
+        bowPullAudioSource.loop = false;
+        bowPullAudioSource.spatialBlend = bowPullSpatialBlend;
+        bowPullAudioSource.volume = bowPullVolume;
+
+#if UNITY_EDITOR
+        if (bowPullClip == null)
+        {
+            bowPullClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/kc.mp3");
+        }
+#endif
+        if (bowPullClip != null)
+        {
+            bowPullAudioSource.clip = bowPullClip;
+        }
+    }
+
+    private void PlayBowPullSound()
+    {
+        if (bowPullAudioSource == null)
+            return;
+
+        if (bowPullClip != null)
+        {
+            bowPullAudioSource.clip = bowPullClip;
+            bowPullAudioSource.volume = bowPullVolume;
+            bowPullAudioSource.spatialBlend = bowPullSpatialBlend;
+            bowPullAudioSource.loop = false;
+            bowPullAudioSource.Play();
+        }
+    }
+
+    private void StopBowPullSound()
+    {
+        if (bowPullAudioSource != null && bowPullAudioSource.isPlaying)
+        {
+            bowPullAudioSource.Stop();
+        }
     }
 
 
@@ -197,6 +266,8 @@ public class BowShoot : MonoBehaviour
 
     private void OnDisable()
     {
+        StopBowPullSound();
+
         if (rightGripAction != null)
         {
             rightGripAction.action.Disable();
@@ -435,6 +506,12 @@ public class BowShoot : MonoBehaviour
 
 
         SpawnArrow();
+
+
+        if (isPulling)
+        {
+            PlayBowPullSound();
+        }
 
 
         Debug.Log(
@@ -866,6 +943,9 @@ public class BowShoot : MonoBehaviour
         hasRightHandAnchor = false;
 
 
+        StopBowPullSound();
+
+
         ShootArrow(
             savedPullDistance,
             savedShootDirection
@@ -1009,6 +1089,9 @@ public class BowShoot : MonoBehaviour
         isPulling = false;
 
         hasRightHandAnchor = false;
+
+
+        StopBowPullSound();
 
 
         if (currentArrow != null)
