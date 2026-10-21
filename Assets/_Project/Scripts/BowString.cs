@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[ExecuteAlways]
 [RequireComponent(typeof(LineRenderer))]
 public class BowString : MonoBehaviour
 {
@@ -26,19 +27,29 @@ public class BowString : MonoBehaviour
         UpdateString();
     }
 
-    private void Setup()
+    private void OnValidate()
+    {
+        Setup();
+        UpdateString();
+    }
+
+    public void Setup()
     {
         if (line == null)
             line = GetComponent<LineRenderer>();
 
-        line.positionCount = 3;
-
-        // Chúng ta truyền WORLD POSITION bên dưới
-        line.useWorldSpace = true;
+        if (line != null)
+        {
+            line.positionCount = 3;
+            line.useWorldSpace = true;
+        }
     }
 
-    private void UpdateString()
+    public void UpdateString()
     {
+        if (line == null)
+            Setup();
+
         if (line == null)
             return;
 

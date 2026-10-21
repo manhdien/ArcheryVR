@@ -165,14 +165,29 @@ public class BowShoot : MonoBehaviour
 
     private void Awake()
     {
-        if (pullPoint != null)
+        if (stringTop != null && stringBottom != null && pullPoint != null && pullPoint.parent != null)
+        {
+            Vector3 restWorld = (stringTop.position + stringBottom.position) * 0.5f;
+            pullPointRestLocalPosition = pullPoint.parent.InverseTransformPoint(restWorld);
+            pullPoint.localPosition = pullPointRestLocalPosition;
+        }
+        else if (pullPoint != null)
         {
             pullPointRestLocalPosition =
                 pullPoint.localPosition;
         }
 
 
-        if (grabHandle != null)
+        if (grabHandle != null && pullPoint != null)
+        {
+            grabHandle.localPosition = pullPoint.localPosition;
+            grabHandleRestLocalPosition =
+                grabHandle.localPosition;
+
+            grabHandleRestLocalRotation =
+                grabHandle.localRotation;
+        }
+        else if (grabHandle != null)
         {
             grabHandleRestLocalPosition =
                 grabHandle.localPosition;
@@ -321,6 +336,12 @@ public class BowShoot : MonoBehaviour
 
         ApplyStoredPullDistance();
 
+        var bsComp = GetComponent<BowString>();
+        if (bsComp != null)
+        {
+            bsComp.UpdateString();
+        }
+
 
         UpdateArrow();
     }
@@ -332,6 +353,11 @@ public class BowShoot : MonoBehaviour
 
     private bool IsRightGripPressed()
     {
+        if (Keyboard.current != null && Keyboard.current.gKey.isPressed)
+        {
+            return true;
+        }
+
         if (rightGripAction == null)
             return false;
 
@@ -526,6 +552,11 @@ public class BowShoot : MonoBehaviour
 
     private Vector3 GetStringRestWorldPosition()
     {
+        if (stringTop != null && stringBottom != null)
+        {
+            return (stringTop.position + stringBottom.position) * 0.5f;
+        }
+
         if (pullPoint == null)
             return transform.position;
 
@@ -642,30 +673,22 @@ public class BowShoot : MonoBehaviour
 
     private Vector3 GetShootDirection()
     {
-        if (pullPoint == null ||
-            bowCenter == null)
-        {
-            return transform.forward;
-        }
-
-
         Vector3 restPosition =
             GetStringRestWorldPosition();
 
-
-        Vector3 direction =
-            bowCenter.position -
-            restPosition;
-
-
-        if (direction.sqrMagnitude <
-            0.0001f)
+        if (bowCenter != null)
         {
-            return transform.forward;
+            Vector3 direction =
+                bowCenter.position -
+                restPosition;
+
+            if (direction.sqrMagnitude >= 0.0001f)
+            {
+                return direction.normalized;
+            }
         }
 
-
-        return direction.normalized;
+        return transform.forward;
     }
 
 
@@ -1096,7 +1119,18 @@ public class BowShoot : MonoBehaviour
 
         if (currentArrow != null)
         {
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                DestroyImmediate(currentArrow);
+            }
+            else
+            {
+                Destroy(currentArrow);
+            }
+#else
             Destroy(currentArrow);
+#endif
         }
 
 
@@ -1122,26 +1156,47 @@ public class BowShoot : MonoBehaviour
     {
         if (pullPoint != null)
         {
-            pullPoint.localPosition =
-                pullPointRestLocalPosition;
+            if (stringTop != null && stringBottom != null && pullPoint.parent != null)
+            {
+                Vector3 restWorld = (stringTop.position + stringBottom.position) * 0.5f;
+                pullPointRestLocalPosition = pullPoint.parent.InverseTransformPoint(restWorld);
+                pullPoint.localPosition = pullPointRestLocalPosition;
+            }
+            else
+            {
+                pullPoint.localPosition =
+                    pullPointRestLocalPosition;
+            }
         }
 
 
         // =====================================================
         // QUAN TRỌNG:
         //
-        // Bản trước thiếu phần này.
-        // Sau vài phát GrabHandle bị nằm ở vị trí kéo cũ.
+        // Đặt lại GrabHandle theo đúng điểm nghỉ của dây
         // =====================================================
 
-        if (grabHandle != null)
+        if (grabHandle != null && pullPoint != null)
+        {
+            grabHandle.localPosition =
+                pullPoint.localPosition;
+
+            grabHandle.localRotation =
+                grabHandleRestLocalRotation;
+        }
+        else if (grabHandle != null)
         {
             grabHandle.localPosition =
                 grabHandleRestLocalPosition;
 
-
             grabHandle.localRotation =
                 grabHandleRestLocalRotation;
+        }
+
+        var bsComp = GetComponent<BowString>();
+        if (bsComp != null)
+        {
+            bsComp.UpdateString();
         }
     }
 
@@ -1164,6 +1219,10 @@ public class BowShoot : MonoBehaviour
                 true
             );
 
+        if (bowColliders == null || bowColliders.Length == 0)
+        {
+            bowColliders = GetComponentsInChildren<Collider>(true);
+        }
 
         if (bowColliders != null)
         {
