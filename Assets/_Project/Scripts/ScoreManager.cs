@@ -111,6 +111,13 @@ public class ScoreManager : MonoBehaviour
         }
 
         Instance = this;
+        state = GameState.StartMenu;
+        currentScore = 0;
+        arrowsShot = 0;
+        timeRemaining = roundDuration;
+        isTimerRunning = false;
+        hasRecordedResultThisRound = false;
+        lastGameOverReason = GameOverReason.None;
         LoadLeaderboard();
     }
 

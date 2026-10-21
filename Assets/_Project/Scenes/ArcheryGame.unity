@@ -13410,7 +13410,7 @@ MonoBehaviour:
   bowInteractable: {fileID: 484065517}
   currentScore: 0
   arrowsShot: 0
-  state: 1
+  state: 0
   hasRecordedResultThisRound: 0
   leaderboardData:
     records: []
